@@ -10,11 +10,11 @@ For usage instructions, please see the [user guide](Documentation/UserGuide.md).
 ### Features
 * Support for TresEd-generated TPM files
 * Import/export of meshes and instances from TPMs with corresponding positions, scales, and rotations
+* Import/export of bones and skin via armature generation
 * Import/export of materials with references generated to on-disk textures
 * Automatic texture node creation and hook-up upon import
 
 ### Roadmap/Known Issues
-* Bone and skin blocks are not currently supported
 * TScript attributes are unsupported and not preserved in an import/export process
 * Extended/"meta" TScript attributes (such as `ext_GeometryType`) are not supported
 
