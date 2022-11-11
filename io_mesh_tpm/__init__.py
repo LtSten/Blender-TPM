@@ -16,13 +16,13 @@
 bl_info = {
 	"name": "Trespasser Model Import/Export",
 	"author": "Matt Rowe",
-	"version": (0, 4, 4),
+	"version": (0, 5, 0),
 	"blender": (3, 0, 0),
 	"location": "File > Import/Export > Trespasser Model",
-	"warning": "Still a somewhat early implementation - open to feedback and bugs.",
 	"description": "Support for importing and exporting models and materials to and from TPM files",
-	"warning": "",
+	"warning": "Release candidate version.",
 	"doc_url": "https://www.trescomforum.org/viewtopic.php?f=58&t=11689",
+	"tracker_url": "https://www.trescomforum.org/viewtopic.php?f=58&t=11689",
 	"category": "Import-Export",
 }
 
@@ -40,8 +40,8 @@ if "bpy" in locals():
 	else:
 		from io_mesh_tpm import tpm_export
 	
-	if "tpm_utils" in locals():
-		tpm_utils = reload(tpm_utils)
+	reload(tpm_utils)
+	reload(tpm_types)
 	
 	shouldUnregister = True
 else:
