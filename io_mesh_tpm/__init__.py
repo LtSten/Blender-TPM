@@ -1,4 +1,4 @@
-#	Copyright (C) 2021 Matt Rowe
+#	Copyright (C) 2022 Matt Rowe
 #
 #	This program is free software: you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 bl_info = {
 	"name": "Trespasser Model Import/Export",
 	"author": "Matt Rowe",
-	"version": (0, 4, 0),
+	"version": (0, 4, 1),
 	"blender": (3, 0, 0),
 	"location": "File > Import/Export > Trespasser Model",
 	"warning": "Still a somewhat early implementation - open to feedback and bugs.",

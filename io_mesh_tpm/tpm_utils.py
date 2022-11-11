@@ -493,6 +493,7 @@ def TPMToTPMRaw(tpm):
 			meshProperties.append(["t", f"({texCoord[0]},{texCoord[1]})"])
 		# Normals
 		for normal in mesh.normals:
+			print("TPM: n = %s" % normal)
 			meshProperties.append(["n", f"({normal[0]},{normal[1]},{normal[2]})"])
 		# Faces
 		for face in mesh.faces:
@@ -608,6 +609,7 @@ def Export(objects, file, opacityFaceExportMode):
 	tpmMaterialsByName = {mat.name : mat for mat in tpmMaterials}
 	
 	# Meshes
+	bmeshMeshes = list() # (vectors in) bmeshes must persist until we've written the TPM 
 	for mesh in blenderMeshes:
 		tpmMeshName = mesh.name
 		tpmMaterialNames = list()
@@ -620,6 +622,7 @@ def Export(objects, file, opacityFaceExportMode):
 			tpmMaterialNames.append(material.name)
 		# Vertices and their properties
 		bm = bmesh.new()
+		bmeshMeshes.append(bm) # Keep track of the bmeshes we create
 		bm.from_mesh(mesh)
 		bm.verts.ensure_lookup_table()
 		bm.verts.index_update()
@@ -706,7 +709,6 @@ def Export(objects, file, opacityFaceExportMode):
 		
 		# Construct the mesh
 		tpmMeshes.append(TPM.Mesh(tpmMeshName, tpmMaterialNames, tpmVertices, tpmTexCoords, tpmNormals, tpmFaces))
-		bm.free()
 	
 	# Instances
 	for object in objects:
@@ -724,5 +726,4 @@ def Export(objects, file, opacityFaceExportMode):
 	
 	# Write it to file
 	WriteTPMRawToFile(tpmRaw, file)
-	
 	print("Export finished")
