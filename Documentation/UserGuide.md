@@ -111,11 +111,19 @@ A successful TPM import will perform the following actions:
 
 ## Exporting
 As is standard for Blender add-ons, exporting works with the current selection, so you should select all instances that you wish to export.
+* Bones and Skins - to export a Blender mesh as a skin block (rather than a mesh block), the plugin checks for the following setup:
+	* An instance of a mesh with an Armature modifier applied, referencing an Armature object
+	* The armature object contains an armature with bones named such that they end in a non-digit character followed by exactly two digits (e.g. 'Bone04' but not any of '04', 'Bone4' or 'Bone004')
+	* The instance has all vertices assigned to vertex groups, where each group has a name that also ends in exactly two digits
+	* Upon export, armature bones are matched with vertex groups based solely on their index (e.g. the '04'). In particular, a bone named 'Bone04' will match vertex groups named 'Bone04' or 'VertexGroup04'.
+	* Exported bone elements are named $J{MeshName}{BoneIndex}. For example, a bone named Bone04 on an instance I of a mesh Mesh would be exported as $JMesh04.
+	* 0 is treated as a valid bone index. This is consistent with all of TresEd, Trespasser, and the 3ds Max import plugin, contrarty to the TPM specification (file format documentation).
 
 The export dialog has the following options:
 | Option | Default | Description |
 | --- | --- | --- |
 | Opacity Face Export | Forward Only | As Blender does not support duplicate faces, when a face contains an alpha material (c.f. [Alpha Faces](#alpha-faces)): <ul><li>"Forward Only" exports only the forward-facing face</li><li>"Double Sided" duplicates the front face and flips the winding order</li><li>"Use Material Backface Culling" examines the "Backface Culling" material option (on a per-material basis) and writes the back face if and only if this is disabled.</li></ul> |
+* It is recommended - but not required - that you name bones consistently with the expected format (i.e. $J{MeshName}{BoneIndex}), since these are constructed automatically on import and export.
 
 ## Warnings, Errors, and Bug Reports
 Warnings and errors will be reported as a tooltip. In general:
