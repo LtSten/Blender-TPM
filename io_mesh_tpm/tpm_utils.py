@@ -1,4 +1,5 @@
 import bpy
+from bpy_extras.image_utils import load_image
 import bmesh
 import math
 import re
@@ -262,7 +263,9 @@ def FindTextureOnDisk(textureSearchPath, stripDirectoriesFromTextureNames, textu
 		textureName = Path(textureName).name
 	filename = Path(textureSearchPath).joinpath(textureName)
 	if not filename.is_file():
-		raise ValueError("Failed to find texture \"" + textureName + "\" in path \"" + textureSearchPath + "\".\nFinal lookup was \"" + str(filename) + "\"")
+		#raise ValueError("Failed to find texture \"" + textureName + "\" in path \"" + textureSearchPath + "\".\nFinal lookup was \"" + str(filename) + "\"")
+		# Allow a texture to not exist on disk - we can still create the material.
+		return None
 	return str(filename)
 
 # ----------------------------------------------------------------
@@ -270,12 +273,12 @@ def CreateImageNodeFromTPMTexMap(mat, mapName, filepath):
 	imageNode = mat.node_tree.nodes.new("ShaderNodeTexImage")
 	imageNode.image = bpy.data.images.get(mapName)
 	if not imageNode.image:
-		imageNode.image = bpy.data.images.load(filepath)
+		imageNode.image = load_image(filepath if filepath else "", "", place_holder=True)
 		imageNode.image.name = mapName
 	return imageNode
 
 # ----------------------------------------------------------------
-def Import(tpmData, textureSearchPath, stripDirectoriesFromTextureNames, overwriteExistingMaterials, toCollection):
+def Import(operator, tpmData, textureSearchPath, stripDirectoriesFromTextureNames, overwriteExistingMaterials, toCollection):
 	print("Beginning import")
 	# Process the TPM
 	tpm = TPMRawToTPM(StringToTPMRaw(tpmData))
@@ -304,6 +307,8 @@ def Import(tpmData, textureSearchPath, stripDirectoriesFromTextureNames, overwri
 			
 			if material.colourmap:
 				imageNode = CreateImageNodeFromTPMTexMap(mat, material.colourmap, FindTextureOnDisk(textureSearchPath, stripDirectoriesFromTextureNames, material.colourmap))
+				if not Path(imageNode.image.filepath).is_file():
+					operator.report({'WARNING'}, f'Failed to load colour texture {material.colourmap}')
 				imageNode.name = "Colour Map"
 				mat.node_tree.links.new(imageNode.outputs[0], bsdfNode.inputs["Base Color"])
 			
@@ -315,12 +320,16 @@ def Import(tpmData, textureSearchPath, stripDirectoriesFromTextureNames, overwri
 				
 				# Image node
 				imageNode = CreateImageNodeFromTPMTexMap(mat, material.bumpmap, FindTextureOnDisk(textureSearchPath, stripDirectoriesFromTextureNames, material.bumpmap))
+				if not Path(imageNode.image.filepath).is_file():
+					operator.report({'WARNING'}, f'Failed to load bumpmap texture {material.bumpmap}')
 				imageNode.name = "Bump Map"
 				mat.node_tree.links.new(imageNode.outputs[0], bumpNode.inputs[2])
 				
 			
 			if material.opacitymap:
 				imageNode = CreateImageNodeFromTPMTexMap(mat, material.opacitymap, FindTextureOnDisk(textureSearchPath, stripDirectoriesFromTextureNames, material.opacitymap))
+				if not Path(imageNode.image.filepath).is_file():
+					operator.report({'WARNING'}, f'Failed to load opacity texture {material.opacitymap}')
 				imageNode.name = "Opacity Map"
 				mat.node_tree.links.new(imageNode.outputs[0], bsdfNode.inputs["Alpha"])
 				mat.blend_method = 'CLIP'

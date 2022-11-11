@@ -57,8 +57,8 @@ class IMPORT_OT_tpm(Operator, ImportHelper):
 			textureSearchPath = str(Path(self.filepath).parent)
 
 		try:
-			tpm_utils.Import(data, textureSearchPath, self.stripDirectoriesFromTextureNames, self.overwriteExistingMaterials, context.collection if self.importToActiveCollection else None)
-		except RuntimeError as e:
+			tpm_utils.Import(self, data, textureSearchPath, self.stripDirectoriesFromTextureNames, self.overwriteExistingMaterials, context.collection if self.importToActiveCollection else None)
+		except Exception as e:
 			self.report({'ERROR'}, str(e))
 			return {'CANCELLED'}
 		
