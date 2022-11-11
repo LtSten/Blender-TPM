@@ -15,7 +15,7 @@ For usage instructions, please see the [user guide](Documentation/UserGuide.md).
 
 ### Roadmap/Known Issues
 * Bone and skin blocks are not currently supported
-* TScript attributes are unsupported and not preserved in an import/export process
+* TScript attributes are unsupported and are not preserved in an import/export process
 * Extended/"meta" TScript attributes (such as `ext_GeometryType`) are not supported
 
 ## Feedback and Support
@@ -24,4 +24,4 @@ If you wish to provide feedback, suggestions, or report a bug, please use one of
 * If you are a TresCom forum member, by replying to the corresponding [TPM add-on post](https://www.trescomforum.org/viewtopic.php?f=58&t=11689)
 * If you are a member of the TresCom Discord server[^tc-discord], by posting a message in the [#modding channel](https://discord.com/channels/424991183547400193/505799931412611082) mentioning `@LtSten`, or reach out to me directly
 
-[^tc-discord]: If you are not a member but wish to join, use the "TresCom Discord" link on the [TresCom homepage](https://www.trescom.org/)]
+[^tc-discord]: If you are not a member but wish to join, use the "TresCom Discord" link on the [TresCom homepage](https://www.trescom.org/)
