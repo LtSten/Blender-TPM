@@ -7,6 +7,9 @@ from datetime import datetime
 from mathutils import Vector
 from pathlib import Path
 
+class TPMException(RuntimeError):
+	pass
+
 # A class encapsulating the TPM file format without any specific implementation
 class TPM_Raw:
 	class Block:
@@ -23,7 +26,7 @@ class TPM:
 	class FileInfo:
 		def __init__(self, formatVersion, name, version, source, date, comments):
 			if formatVersion is None:
-				raise ValueError("FileInfo cannot be constructed with None formatVersion")
+				raise TPMException("FileInfo cannot be constructed with None formatVersion")
 			self.formatVersion = formatVersion
 			self.name = name
 			self.version = version
@@ -34,7 +37,7 @@ class TPM:
 	class Instance:
 		def __init__(self, name, mesh, position, rotation, scale):
 			if None in (name, mesh, position, rotation, scale):
-				raise ValueError("Instance cannot be constructed with None values")
+				raise TPMException("Instance cannot be constructed with None values")
 			self.name = name
 			self.mesh = mesh
 			self.position = position
@@ -44,7 +47,7 @@ class TPM:
 	class Material:
 		def __init__(self, name, colourmap, bumpmap, opacitymap):
 			if name is None:
-				raise ValueError("Material cannot be constructed with None name")
+				raise TPMException("Material cannot be constructed with None name")
 			self.name = name
 			self.colourmap = colourmap
 			self.bumpmap = bumpmap
@@ -59,15 +62,15 @@ class TPM:
 				self.normalIndices = normalIndices
 				self.materialIndex = materialIndex
 				if len(vertexIndices) != 3:
-					raise ValueError("Face must have exactly three vertex indices")
+					raise TPMException("Face must have exactly three vertex indices")
 				if len(texCoordIndices) != 3:
-					raise ValueError("Face must have exactly three texture coordinate indices")
+					raise TPMException("Face must have exactly three texture coordinate indices")
 				if len(normalIndices) != 3:
-					raise ValueError("Face must have exactly three normal indices")
+					raise TPMException("Face must have exactly three normal indices")
 		
 		def __init__(self, name, materialNames, vertices, textureCoords, normals, faces):
 			if name is None:
-				raise ValueError("Mesh cannot be constructed with None name")
+				raise TPMException("Mesh cannot be constructed with None name")
 			self.name = name
 			self.materialNames = materialNames
 			self.vertices = vertices
@@ -77,7 +80,7 @@ class TPM:
 					
 	def __init__(self, fileInfo, materials, meshes, instances):
 		if fileInfo is None:
-			raise ValueError("TPM must contain a fileinfo block")
+			raise TPMException("TPM must contain a fileinfo block")
 		self.fileInfo = fileInfo
 		self.materials = materials
 		self.meshes = meshes
@@ -108,7 +111,7 @@ def StringToTPMRaw(tpmData):
 	def ParseProperty(line):
 		pairMatch = propertyRegex.fullmatch(line)
 		if pairMatch is None:
-			raise RuntimeError("Error on line \"" + line + "\": expected property")
+			raise TPMException("Error on line \"" + line + "\": expected property")
 		return [pairMatch.group(1), pairMatch.group(2)] # Group indexing follows the usual regex convention of starting from 1
 	
 	def ParseBlock(lineIter):
@@ -123,7 +126,7 @@ def StringToTPMRaw(tpmData):
 			# Find a type, with a possible identifier
 			typeIdentifierMatch = typeWithOptionalIdentifierRegex.fullmatch(line)
 			if typeIdentifierMatch is None:
-				raise RuntimeError("Error on line \"" + line + "\": expected block type or type-identifier")
+				raise TPMException("Error on line \"" + line + "\": expected block type or type-identifier")
 			blockType = typeIdentifierMatch.group(1)
 			blockIdentifier = None
 			if len(typeIdentifierMatch.groups()) > 1:
@@ -132,7 +135,7 @@ def StringToTPMRaw(tpmData):
 			# Expect an open brace
 			line = NonTrivialLine(lineIter)
 			if line != "{":
-				raise RuntimeError("Error on line \"" + line + "\": expected opening brace after type-identifier " + blockType + ((" " + blockIdentifier) if blockIdentifier else ""))
+				raise TPMException("Error on line \"" + line + "\": expected opening brace after type-identifier " + blockType + ((" " + blockIdentifier) if blockIdentifier else ""))
 			
 			# Read properties
 			properties = list()
@@ -145,7 +148,7 @@ def StringToTPMRaw(tpmData):
 			# Return the block
 			return TPM_Raw.Block(blockType, blockIdentifier, properties)
 		except StopIteration as e:
-			raise RuntimeError("Unexpected end of file reached whilst parsing block") from e
+			raise TPMException("Unexpected end of file reached whilst parsing block") from e
 	
 	lines = tpmData.splitlines()
 	lineIter = iter(lines)
@@ -177,7 +180,7 @@ def VectorStringToVector(s):
 	line = s.strip() # Remove leading and trailing whitespace
 	line, wasChopped = ChopCharsFromEndsAsymmetrical(line, "(", ")")
 	if not wasChopped:
-		raise ValueError("\"" + s + "\" cannot be converted to a vector")
+		raise TPMException("\"" + s + "\" cannot be converted to a vector")
 	compStrings = line.split(",")
 	components = list()
 	for c in compStrings:
@@ -185,8 +188,9 @@ def VectorStringToVector(s):
 	return Vector(components)
 
 # ----------------------------------------------------------------
-def TPMRawToTPM(raw):
+def TPMRawToTPM(raw, WarningCallback):
 	faceEntryRegex = re.compile(r'\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*,\s*\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*,\s*\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*,\s*(\d+)')
+	skinVertexRegex = re.compile(r'(\(.*?\))\s*,\s*(\d+)')
 	
 	# Iterate over each block, and load the data from it
 	fileInfo = None
@@ -204,7 +208,7 @@ def TPMRawToTPM(raw):
 		# Create the relevant block type
 		if block.type == "fileinfo":
 			if fileInfo is not None:
-				raise ValueError("TPM contains more than one fileinfo block")
+				raise TPMException("TPM contains more than one fileinfo block")
 			stringDict = dict(block.properties)
 			fileInfo = TPM.FileInfo(stringDict["formatversion"], stringDict.get("name"), stringDict.get("version"), stringDict.get("source"), stringDict.get("date"), stringDict.get("comments"))
 		elif block.type == "instance":
@@ -217,7 +221,9 @@ def TPMRawToTPM(raw):
 		elif block.type == "material":
 			stringDict = dict(block.properties)
 			materials.append(TPM.Material(block.identifier, stringDict.get("colormap"), stringDict.get("bumpmap"), stringDict.get("opacitymap")))
-		elif block.type == "mesh":
+		elif block.type == "mesh" or block.type == "skin":
+			if block.type == "skin":
+				WarningCallback(f"skin blocks are not currently fully supported - the mesh will be loaded, but vertex weights will not be preserved ({block.identifier})")
 			# Vector conversion and face construction required
 			materialNames = list()
 			vertices = list()
@@ -228,7 +234,13 @@ def TPMRawToTPM(raw):
 				if props[0] == "m":
 					materialNames.append(props[1])
 				elif props[0] == "v":
-					vertices.append(VectorStringToVector(props[1]))
+					vertexDef = props[1]
+					if block.type == "skin":
+						matches = skinVertexRegex.fullmatch(vertexDef)
+						if not matches:
+							raise TPMException("Skin vertex property \"" + props[1] + "\" is not in the expected format.")
+						vertexDef = matches.group(1)
+					vertices.append(VectorStringToVector(vertexDef))
 				elif props[0] == "t":
 					texCoords.append(VectorStringToVector(props[1]))
 				elif props[0] == "n":
@@ -236,7 +248,7 @@ def TPMRawToTPM(raw):
 				elif props[0] == "f":
 					matches = faceEntryRegex.fullmatch(props[1])
 					if not matches:
-						raise ValueError("Mesh face property \"" + props[1] + "\" is not in the expected format.")
+						raise TPMException("Mesh face property \"" + props[1] + "\" is not in the expected format.")
 					v1 = int(matches.group(1))
 					v2 = int(matches.group(2))
 					v3 = int(matches.group(3))
@@ -249,12 +261,13 @@ def TPMRawToTPM(raw):
 					m = int(matches.group(10))
 					faces.append(TPM.Mesh.Face((v1, v2, v3), (t1, t2, t3), (n1, n2, n3), m))
 				else:
-					raise ValueError("Unknown mesh property type \"" + props[0] + "\" - expected one of m, v, t, n, or f")
+					raise TPMException("Unknown mesh property type \"" + props[0] + "\" - expected one of m, v, t, n, or f")
 			meshes.append(TPM.Mesh(block.identifier, materialNames, vertices, texCoords, normals, faces))
 		elif block.type == "skin" or block.type == "bone":
+			WarningCallback(f"{block.type} blocks are currently unsupported: ({block.identifier})")
 			continue # Silently ignore unsupported but valid block identifiers
 		else:
-			raise ValueError("TPM contains unexpected block type \"" + block.type + "\"")
+			raise TPMException("TPM contains unexpected block type \"" + block.type + "\"")
 	return TPM(fileInfo, materials, meshes, instances)
 
 # ----------------------------------------------------------------
@@ -263,7 +276,7 @@ def FindTextureOnDisk(textureSearchPath, stripDirectoriesFromTextureNames, textu
 		textureName = Path(textureName).name
 	filename = Path(textureSearchPath).joinpath(textureName)
 	if not filename.is_file():
-		#raise ValueError("Failed to find texture \"" + textureName + "\" in path \"" + textureSearchPath + "\".\nFinal lookup was \"" + str(filename) + "\"")
+		#raise TPMException("Failed to find texture \"" + textureName + "\" in path \"" + textureSearchPath + "\".\nFinal lookup was \"" + str(filename) + "\"")
 		# Allow a texture to not exist on disk - we can still create the material.
 		return None
 	return str(filename)
@@ -281,7 +294,7 @@ def CreateImageNodeFromTPMTexMap(mat, mapName, filepath):
 def Import(operator, tpmData, textureSearchPath, stripDirectoriesFromTextureNames, overwriteExistingMaterials, toCollection):
 	print("Beginning import")
 	# Process the TPM
-	tpm = TPMRawToTPM(StringToTPMRaw(tpmData))
+	tpm = TPMRawToTPM(StringToTPMRaw(tpmData), lambda msg: operator.report({'WARNING'}, msg))
 	
 	# Add each material
 	blenderMaterialsByName = dict()
@@ -412,6 +425,7 @@ def Import(operator, tpmData, textureSearchPath, stripDirectoriesFromTextureName
 		bm.to_mesh(mesh)
 		mesh.update()
 		
+		print(f"Successfully imported mesh '{tpmMesh.name}'")
 		blenderMeshesByName[tpmMesh.name] = mesh
 		tpmMeshesByName[tpmMesh.name] = tpmMesh
 
@@ -424,6 +438,9 @@ def Import(operator, tpmData, textureSearchPath, stripDirectoriesFromTextureName
 	# Add each instance as an object in the collection
 	for tpmInstance in tpm.instances:
 		meshName = tpmInstance.mesh
+		if meshName not in blenderMeshesByName:
+			operator.report({'WARNING'}, f"Instance '{tpmInstance.name}' references mesh '{meshName}', but this was not loaded.")
+			continue
 		blenderMesh = blenderMeshesByName[meshName]
 		object = bpy.data.objects.new(tpmInstance.name, blenderMesh)
 		
@@ -437,7 +454,7 @@ def Import(operator, tpmData, textureSearchPath, stripDirectoriesFromTextureName
 		
 		# Append materials in order to ensure correct indexing
 		if len(object.data.materials) != 0:
-			raise RuntimeError("Expected object materials to be empty")
+			raise TPMException("Expected object materials to be empty")
 		
 		tpmMesh = tpmMeshesByName[meshName]
 		for materialIndex, materialName in enumerate(tpmMesh.materialNames):
@@ -570,7 +587,7 @@ def Export(objects, file, opacityFaceExportMode):
 				materialOutput = node
 				break
 		if materialOutput is None:
-			raise ValueError("Could not find a material output node for material \"" + mat.name + "\"")
+			raise TPMException("Could not find a material output node for material \"" + mat.name + "\"")
 		
 		bsdfTypeNode = materialOutput.inputs["Surface"].links[0].from_node
 		

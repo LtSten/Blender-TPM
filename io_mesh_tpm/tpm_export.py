@@ -40,7 +40,7 @@ class EXPORT_OT_tpm(Operator, ExportHelper):
 		
 		try:
 			tpm_utils.Export(context.selected_objects, f, self.opacityFaceExportMode)
-		except RuntimeError as e:
+		except tpm_utils.TPMException as e:
 			self.report({'ERROR'}, str(e))
 			return {'CANCELLED'}
 		

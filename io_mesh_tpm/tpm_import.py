@@ -58,7 +58,7 @@ class IMPORT_OT_tpm(Operator, ImportHelper):
 
 		try:
 			tpm_utils.Import(self, data, textureSearchPath, self.stripDirectoriesFromTextureNames, self.overwriteExistingMaterials, context.collection if self.importToActiveCollection else None)
-		except Exception as e:
+		except tpm_utils.TPMException as e:
 			self.report({'ERROR'}, str(e))
 			return {'CANCELLED'}
 		

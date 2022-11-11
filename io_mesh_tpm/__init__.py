@@ -16,7 +16,7 @@
 bl_info = {
 	"name": "Trespasser Model Import/Export",
 	"author": "Matt Rowe",
-	"version": (0, 4, 2),
+	"version": (0, 4, 3),
 	"blender": (3, 0, 0),
 	"location": "File > Import/Export > Trespasser Model",
 	"warning": "Still a somewhat early implementation - open to feedback and bugs.",
