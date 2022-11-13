@@ -382,7 +382,6 @@ def Import(operator, tpmData, textureSearchPath, stripDirectoriesFromTextureName
 	
 	# Add each mesh
 	blenderMeshesByName = dict()
-	tpmMeshesByName = dict()
 	for tpmMesh in tpm.meshes:
 		mesh = bpy.data.meshes.new(tpmMesh.name)
 		bm = bmesh.new()
@@ -425,9 +424,15 @@ def Import(operator, tpmData, textureSearchPath, stripDirectoriesFromTextureName
 		bm.to_mesh(mesh)
 		mesh.update()
 		
+		# Assign the materials to the mesh
+		# Ensure this is done in-order so that the indices are as expected
+		if len(mesh.materials) != 0:
+			raise TPMException("Expected mesh materials to be empty")
+		for materialName in tpmMesh.materialNames:
+			mesh.materials.append(blenderMaterialsByName[materialName])
+
 		print(f"Successfully imported mesh '{tpmMesh.name}'")
 		blenderMeshesByName[tpmMesh.name] = mesh
-		tpmMeshesByName[tpmMesh.name] = tpmMesh
 
 	# Get or create the collection to add to
 	collection = toCollection
@@ -451,15 +456,6 @@ def Import(operator, tpmData, textureSearchPath, stripDirectoriesFromTextureName
 		for i, v in enumerate(rotRadians):
 			rotRadians[i] = math.radians(v)
 		object.rotation_euler = rotRadians
-		
-		# Append materials in order to ensure correct indexing
-		if len(object.data.materials) != 0:
-			raise TPMException("Expected object materials to be empty")
-		
-		tpmMesh = tpmMeshesByName[meshName]
-		for materialIndex, materialName in enumerate(tpmMesh.materialNames):
-			object.data.materials.append(blenderMaterialsByName[materialName])
-			#object.data.materials[materialIndex] = blenderMaterialsByName[materialName]
 		
 		collection.objects.link(object)
 	print("Import finished")
