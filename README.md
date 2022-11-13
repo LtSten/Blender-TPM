@@ -1,5 +1,7 @@
-# io-mesh-tpm
-This project is a Blender add-on, `io-mesh-tpm`, designed to support the import and export of [TPM files](https://www.trescom.org/files/docs/formats.html#TPM), a [community](https://www.trescom.org/)-created model format for the game [Trespasser](https://en.wikipedia.org/wiki/Trespasser_(video_game)) similar to [obj](https://en.wikipedia.org/wiki/Wavefront_.obj_file).
+# io_mesh_tpm
+This project is a Blender add-on, `io_mesh_tpm`, designed to support the import and export of [TPM files](https://www.trescom.org/files/docs/formats.html#TPM), a [community](https://www.trescom.org/)-created model format for the game [Trespasser](https://en.wikipedia.org/wiki/Trespasser_(video_game)) similar to [obj](https://en.wikipedia.org/wiki/Wavefront_.obj_file).
+
+![Imported TPM model in Blender](Documentation/readme-header.png)
 
 ## Installation and Use
 This addon is intended for use with Blender 3.x - the most recently verified supported version is 3.3.1. Installation should proceed as usual for Blender addons - download the desired version of `io-mesh-tpm.zip` and follow the steps in the Blender guide for [installing add-ons](https://docs.blender.org/manual/en/latest/editors/preferences/addons.html#installing-add-ons).
