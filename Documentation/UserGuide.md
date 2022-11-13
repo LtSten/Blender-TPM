@@ -1,7 +1,7 @@
 # User Guide
 
 ## Getting Started
-`io-mesh-tpm` is an add-on designed for Blender 3.x. You can obtain the latest version of Blender from their [download page](https://www.blender.org/download/), and of the add-on from the [releases page](https://github.com/LtSten/Blender-TPM/releases). After obtaining the zip file, this should be installed as usual - see the guide on [installing add-ons](https://docs.blender.org/manual/en/latest/editors/preferences/addons.html#installing-add-ons). Make sure to enable the add-on after installation, as shown below:
+`io_mesh_tpm` is an add-on designed for Blender 3.x. You can obtain the latest version of Blender from their [download page](https://www.blender.org/download/), and of the add-on from the [releases page](https://github.com/LtSten/Blender-TPM/releases). After obtaining the zip file, this should be installed as usual - see the guide on [installing add-ons](https://docs.blender.org/manual/en/latest/editors/preferences/addons.html#installing-add-ons). Make sure to enable the add-on after installation, as shown below:
 
 ![Preferences Window](guide-preferences.png)
 
