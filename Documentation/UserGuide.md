@@ -94,6 +94,30 @@ Since Blender does not support duplicate faces, the `Backface Culling` toggle in
 
 ![Alpha material settings](guide-material-settings.png)
 
+### Armatures and Bones
+There are some Trespasser-specific caveats to working with armatures for TPM export in Blender. In particular, Trespasser (and hence TPM files) assigns the armature (bones) on a per-mesh (per-skin) basis, whereas Blender allows multiple instances of a model to be assigned their own armature. Furthermore, Blender associates vertices with bones via the vertex group names, allowing multiple bones (each with their own weight) per vertex: these are converted to a single bone index for TPMs.
+
+The required setup for add-on compatible skinning is as follows:
+* *All* model vertices assigned to vertex groups *ending with a two digit number*. This is used to extract the `BoneIndex` parameter for each bone.
+* *One* unique armature modifier assigned to each instance of the mesh, with bones corresponding to each vertex group in the mesh. It is undefined behaviour (unsupported by the add-on) to:
+	* Specify multiple (active) armature modifiers on an instance
+	* Specify different armature modifiers across instances of the same mesh
+
+Upon exporting, the following behaviour occurs:
+* Each vertex is assigned a unique bone by picking the bone of greatest weight
+* Bones are automatically named `$J{MeshName}{BoneIndex}`, where `MeshName` is the name of the *mesh* and `BoneIndex` is the two-digit suffix of the bone
+
+Observe that the bone names themselves are not preserved - only the (unique) two-digit number at the end of each bone's name is used. This is because each bone (joint) in Trespasser is automatically associated with the mesh based on the `$J{MeshName}{BoneIndex}` format. In particular, this means that:
+* Each bone must have a non-trivial name ending in exactly a two-digit number, e.g. `$JModel04` but not `$JModel4`, `$JModel004`, or `04`
+* Each bone in an armature must have a unique trailing two-digit number. For example, it is invalid to name two bones `$JHead04` and `$JFoot04` 
+* It is strongly recommended (but not strictly required) that you follow the naming convention `$J{MeshName}{BoneIndex}` for bones
+
+This is typically configured in the .blend as follows:
+
+| Armature and Bones | Mesh, Vertex Groups, and Modifier |
+| --- | --- |
+| ![Armature and bones](guide-bones-armature.png) | ![Armature assigned to a mesh](guide-bones-mod-vg.png) |
+
 ## Importing
 The import dialog allows the selection of a single TPM file to import into Blender. There is a choice of options in the right-hand panel:
 
@@ -108,22 +132,18 @@ A successful TPM import will perform the following actions:
 * Each mesh block has a corresponding Blender Mesh data block created
 * Each instance is created as a true _instance_ of the base mesh, as though performed by a "Linked Duplication". The position, rotation, and scales will be populated automatically.
 * Materials will automatically be created and assigned to faces
+* Each skin block - in addition to the usual mesh processing - will have its mesh vertices assigned to vertex groups named `$J{ModelName}{BoneIndex}`
+* Armatures will be created for each skin and assigned to each instance of the model via an Armature modifier
 
 ## Exporting
 As is standard for Blender add-ons, exporting works with the current selection, so you should select all instances that you wish to export.
-* Bones and Skins - to export a Blender mesh as a skin block (rather than a mesh block), the plugin checks for the following setup:
-	* An instance of a mesh with an Armature modifier applied, referencing an Armature object
-	* The armature object contains an armature with bones named such that they end in a non-digit character followed by exactly two digits (e.g. 'Bone04' but not any of '04', 'Bone4' or 'Bone004')
-	* The instance has all vertices assigned to vertex groups, where each group has a name that also ends in exactly two digits
-	* Upon export, armature bones are matched with vertex groups based solely on their index (e.g. the '04'). In particular, a bone named 'Bone04' will match vertex groups named 'Bone04' or 'VertexGroup04'.
-	* Exported bone elements are named $J{MeshName}{BoneIndex}. For example, a bone named Bone04 on an instance I of a mesh Mesh would be exported as $JMesh04.
-	* 0 is treated as a valid bone index. This is consistent with all of TresEd, Trespasser, and the 3ds Max import plugin, contrarty to the TPM specification (file format documentation).
+
+Skin blocks will automatically be detected and generated based on the presence of an armature modifier. If the configuration is invalid, the add-on will attempt to export it as a mesh block instead, and provide warnings as to why the skin export failed. You can check whether a given model was exported as a skin or a mesh in the Blender console.
 
 The export dialog has the following options:
 | Option | Default | Description |
 | --- | --- | --- |
 | Opacity Face Export | Forward Only | As Blender does not support duplicate faces, when a face contains an alpha material (c.f. [Alpha Faces](#alpha-faces)): <ul><li>"Forward Only" exports only the forward-facing face</li><li>"Double Sided" duplicates the front face and flips the winding order</li><li>"Use Material Backface Culling" examines the "Backface Culling" material option (on a per-material basis) and writes the back face if and only if this is disabled.</li></ul> |
-* It is recommended - but not required - that you name bones consistently with the expected format (i.e. $J{MeshName}{BoneIndex}), since these are constructed automatically on import and export.
 
 ## Warnings, Errors, and Bug Reports
 Warnings and errors will be reported as a tooltip. In general:
