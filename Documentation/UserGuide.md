@@ -98,7 +98,7 @@ Since Blender does not support duplicate faces, the `Backface Culling` toggle in
 There are some Trespasser-specific caveats to working with armatures for TPM export in Blender. In particular, Trespasser (and hence TPM files) assigns the armature (bones) on a per-mesh (per-skin) basis, whereas Blender allows multiple instances of a model to be assigned their own armature. Furthermore, Blender associates vertices with bones via the vertex group names, allowing multiple bones (each with their own weight) per vertex: these are converted to a single bone index for TPMs.
 
 The required setup for add-on compatible skinning is as follows:
-* *All* model vertices assigned to vertex groups *ending with a two digit number*. This is used to extract the `BoneIndex` parameter for each bone.
+* *All* model vertices assigned to vertex groups *ending with a two digit number*[^fn-bone-zero]. This is used to extract the `BoneIndex` parameter for each bone.
 * *One* unique armature modifier assigned to each instance of the mesh, with bones corresponding to each vertex group in the mesh. It is undefined behaviour (unsupported by the add-on) to:
 	* Specify multiple (active) armature modifiers on an instance
 	* Specify different armature modifiers across instances of the same mesh
@@ -117,6 +117,8 @@ This is typically configured in the .blend as follows:
 | Armature and Bones | Mesh, Vertex Groups, and Modifier |
 | --- | --- |
 | ![Armature and bones](guide-bones-armature.png) | ![Armature assigned to a mesh](guide-bones-mod-vg.png) |
+
+[^fn-bone-zero]: In keeping with Trespasser and TresEd, `00` is a valid bone index.
 
 ## Importing
 The import dialog allows the selection of a single TPM file to import into Blender. There is a choice of options in the right-hand panel:
