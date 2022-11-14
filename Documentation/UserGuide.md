@@ -122,7 +122,7 @@ Warnings and errors will be reported as a tooltip. In general:
 * Warnings mean an import has succeeded, but with some non-critical missing elements. The most common example is failing to find a bumpmap texture (note that this option is disabled by default when exporting from TresEd) - the TPM will still import/export correctly, but no bump-modulated normals will be visible in Blender.
 * Errors are critical failures that mean an import has not been successful. This may be due to either an invalid TPM, or a bug in the add-on.
 
-All output, including some additional messaging, can be view in the Blender console (Window > Toggle System Console).
+All output, including some additional messaging, can be viewed in the Blender console (Window > Toggle System Console).
 
 <img alt="Import console output" src="guide-console.png" height="350px"/>
 
