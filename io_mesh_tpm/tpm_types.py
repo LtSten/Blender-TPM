@@ -187,7 +187,7 @@ def LinesToTPMRaw(tpmData: list[str]) -> TPM_Raw:
 # ----------------------------------------------------------------
 def TPMRawToTPM(raw: TPM_Raw, WarningCallback) -> TPM:
 	faceEntryRegex = re.compile(r'\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*,\s*\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*,\s*\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*,\s*(\d+)')
-	skinVertexRegex = re.compile(r'(\(.*?\))\s*,\s*(\d+)')
+	skinVertexRegex = re.compile(r'(\(.*?\))\s*,\s*(-?\d+)')
 	
 	# Iterate over each block, and load the data from it
 	fileInfo: TPM.FileInfo = None

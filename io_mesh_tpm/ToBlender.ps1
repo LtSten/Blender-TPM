@@ -1,4 +1,4 @@
-$BlenderVer = "3.3"
+$BlenderVer = "3.4"
 $BlenderDir = "D:\Program Files\Blender Foundation\Blender $BlenderVer\$BlenderVer"
 $OutputDir = "$BlenderDir\scripts\addons\io_mesh_tpm"
 Write-Output "Copying files to '$OutputDir'"

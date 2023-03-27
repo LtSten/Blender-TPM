@@ -166,15 +166,14 @@ def Export(operator: bpy.types.Operator, objects: list[bpy.types.Object], file, 
 			tpmVertices.append(vertex.co)
 			tpmNormals.append(vertex.normal)
 			# bmesh vertices, as long as we haven't add/removed any since creation, are indexed identically to the mesh vertices
-			# Assign this vertex to a bone based on the greatest weighted vertex group
+			# Assign this vertex to a bone based on the greatest weighted vertex group, or leave it unbound if this vertex is not assigned to any groups
 			if exportSkinElement:
 				meshVertex = mesh.vertices[vertex.index]
-				if not meshVertex.groups:
-					exportSkinElement = False
-					operator.report({'WARNING'}, f"Mesh '{tpmMeshName}' (with instance '{sourceObject.name}') contains a vertex that is not assigned to a vertex group. No skin will be exported.")
-					continue
-				vertexGroupIndex = max(meshVertex.groups, key=lambda groupEl : groupEl.weight).group
-				tpmVertexBoneIndices.append(boneIndicesByVertexGroupIndex.get(vertexGroupIndex))
+				if meshVertex.groups:
+					vertexGroupIndex = max(meshVertex.groups, key=lambda groupEl : groupEl.weight).group
+					tpmVertexBoneIndices.append(boneIndicesByVertexGroupIndex.get(vertexGroupIndex))
+				else:
+					tpmVertexBoneIndices.append(GetDefaultUnboundBoneIndex())
 		if exportSkinElement and len(tpmVertexBoneIndices) != len(tpmVertices):
 			raise TPMException(f"Mesh '{tpmMeshName}': number of vertices ({len(tpmVertices)}) does not match the number of vertex bone indices ({len(tpmVertexBoneIndices)})")
 		

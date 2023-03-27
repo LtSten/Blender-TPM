@@ -186,6 +186,9 @@ def Import(operator: bpy.types.Operator, tpmData: str, textureSearchPath: str, s
 			for boneIndex in set(tpmMesh.vertexBoneIndices):
 				# Following TresEd, Trespasser itself, and the 3ds Max import/export script, we allow 0 to be a valid bone index
 				# The TPM spec says otherwise, but clearly this has never been the case in practice
+				# Negative indices are interpreted as corresponding to unbound vertices
+				if not IsBoundBoneIndex(boneIndex):
+					continue
 				boneName =  ConstructJointName(tpmMesh.name, boneIndex)
 				# Try to find the corresponding bone in the TPM
 				tpmBone = tpmBonesByName.get(boneName)
@@ -248,7 +251,8 @@ def Import(operator: bpy.types.Operator, tpmData: str, textureSearchPath: str, s
 			# Collect all the vertex indices assigned to each bone
 			vertexIndicesByBoneID: dict[int, list[int]] = {}
 			for vertexIndex, boneIndex in enumerate(tpmMesh.vertexBoneIndices):
-				vertexIndicesByBoneID.setdefault(boneIndex, []).append(vertexIndex)
+				if IsBoundBoneIndex(boneIndex):
+					vertexIndicesByBoneID.setdefault(boneIndex, []).append(vertexIndex)
 			# Create a vertex group for each bone and add the corresponding vertices
 			for boneIndex, vertexIndices in vertexIndicesByBoneID.items():
 				vertexGroup: bpy.types.VertexGroup = object.vertex_groups.new(name=ConstructJointName(tpmMesh.name, boneIndex))

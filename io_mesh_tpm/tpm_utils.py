@@ -8,6 +8,14 @@ def ConstructJointName(parentName: str, jointIndex: int):
 	return f"$J{parentName}{jointIndex:02d}"
 
 # ----------------------------------------------------------------
+def IsBoundBoneIndex(index: int):
+	return index >= 0
+
+# ----------------------------------------------------------------
+def GetDefaultUnboundBoneIndex() -> int:
+	return -1
+
+# ----------------------------------------------------------------
 def ToRadians(v: Vector) -> Vector:
 	result = v.copy()
 	for i, x in enumerate(v):
