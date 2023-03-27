@@ -98,13 +98,14 @@ Since Blender does not support duplicate faces, the `Backface Culling` toggle in
 There are some Trespasser-specific caveats to working with armatures for TPM export in Blender. In particular, Trespasser (and hence TPM files) assigns the armature (bones) on a per-mesh (per-skin) basis, whereas Blender allows multiple instances of a model to be assigned their own armature. Furthermore, Blender associates vertices with bones via the vertex group names, allowing multiple bones (each with their own weight) per vertex: these are converted to a single bone index for TPMs.
 
 The required setup for add-on compatible skinning is as follows:
-* *All* model vertices assigned to vertex groups *ending with a two digit number*[^fn-bone-zero]. This is used to extract the `BoneIndex` parameter for each bone.
+* All vertex groups must *end with a two digit number*[^fn-bone-zero]. This is used to extract the `BoneIndex` parameter for each bone.
+* It is permissible for vertices to not be assigned to any vertex group (in which case they will be assigned an index of -1 in the exported TPM)
 * *One* unique armature modifier assigned to each instance of the mesh, with bones corresponding to each vertex group in the mesh. It is undefined behaviour (unsupported by the add-on) to:
 	* Specify multiple (active) armature modifiers on an instance
 	* Specify different armature modifiers across instances of the same mesh
 
 Upon exporting, the following behaviour occurs:
-* Each vertex is assigned a unique bone by picking the bone of greatest weight
+* If a vertex is present in at least one vertex group, it is assigned a unique bone by picking the bone of greatest weight
 * Bones are automatically named `$J{MeshName}{BoneIndex}`, where `MeshName` is the name of the *mesh* and `BoneIndex` is the two-digit suffix of the bone
 
 Observe that the bone names themselves are not preserved - only the (unique) two-digit number at the end of each bone's name is used. This is because each bone (joint) in Trespasser is automatically associated with the mesh based on the `$J{MeshName}{BoneIndex}` format. In particular, this means that:
@@ -118,7 +119,7 @@ This is typically configured in the .blend as follows:
 | --- | --- |
 | ![Armature and bones](guide-bones-armature.png) | ![Armature assigned to a mesh](guide-bones-mod-vg.png) |
 
-[^fn-bone-zero]: In keeping with Trespasser and TresEd, `00` is a valid bone index.
+[^fn-bone-zero]: In keeping with Trespasser and TresEd, `00` is a valid bone index. Vertices not assigned to a bone will be written to the TPM with index -1. On import, any negative bone index in the TPM will be treated as unbound (i.e. the vertex will not be assigned to any bone). 
 
 ## Importing
 The import dialog allows the selection of a single TPM file to import into Blender. There is a choice of options in the right-hand panel:
