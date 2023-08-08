@@ -14,13 +14,12 @@
 #	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 bl_info = {
-	"name": "Trespasser Model Import/Export",
+	"name": "Trespasser Model Import/Export (.tpm)",
 	"author": "Matt Rowe",
-	"version": (0, 5, 0),
+	"version": (0, 5, 1),
 	"blender": (3, 0, 0),
 	"location": "File > Import/Export > Trespasser Model",
 	"description": "Support for importing and exporting models and materials to and from TPM files",
-	"warning": "Release candidate version.",
 	"doc_url": "https://www.trescomforum.org/viewtopic.php?f=58&t=11689",
 	"tracker_url": "https://www.trescomforum.org/viewtopic.php?f=58&t=11689",
 	"category": "Import-Export",
