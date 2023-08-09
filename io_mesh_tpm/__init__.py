@@ -16,7 +16,7 @@
 bl_info = {
 	"name": "Trespasser Model Import/Export (.tpm)",
 	"author": "Matt Rowe",
-	"version": (0, 5, 1),
+	"version": (0, 5, 2),
 	"blender": (3, 0, 0),
 	"location": "File > Import/Export > Trespasser Model",
 	"description": "Support for importing and exporting models and materials to and from TPM files",
