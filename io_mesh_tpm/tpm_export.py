@@ -106,6 +106,10 @@ def Export(operator: bpy.types.Operator, objects: list[bpy.types.Object], file, 
 			continue
 		# Fetch all armatures referenced by armature modifiers
 		armatureObjects: list[bpy.types.Object] = [m.object for m in object.modifiers if isinstance(m, bpy.types.ArmatureModifier) and m.object and isinstance(m.object.data, bpy.types.Armature)]
+		# If there are no armatures, don't track this object as a skin - we'll just export it as a mesh.
+		if not armatureObjects:
+			continue
+		# Otherwise, we're expecting exactly one armature - warn if this isn't the case, but it's not a critical error.
 		if len(armatureObjects) != 1:
 			operator.report({'WARNING'}, f"Object '{object.name}' has multiple armature objects assigned via armature modifiers - only the first will be used to define a skin")
 		armatureObject = armatureObjects[0]
