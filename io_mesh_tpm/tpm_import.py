@@ -58,7 +58,7 @@ def Import(operator: bpy.types.Operator, tpmData: str, textureSearchPath: str, s
 			materialOutputNode = nodes.new("ShaderNodeOutputMaterial")
 			bsdfNode = mat.node_tree.nodes.new("ShaderNodeBsdfPrincipled")
 			bsdfNode.inputs["Roughness"].default_value = 0.9
-			bsdfNode.inputs["Specular"].default_value = 0.0
+			bsdfNode.inputs["Specular IOR Level"].default_value = 0.0
 			mat.node_tree.links.new(bsdfNode.outputs[0], materialOutputNode.inputs[0])
 			
 			if material.colourmap:

@@ -2,6 +2,14 @@ import math
 from mathutils import Vector
 
 # ----------------------------------------------------------------
+def register():
+	pass
+
+# ----------------------------------------------------------------
+def unregister():
+	pass
+
+# ----------------------------------------------------------------
 def ConstructJointName(parentName: str, jointIndex: int):
 	if not jointIndex in range(100):
 		raise ValueError(f"Joint index {jointIndex} is not in the range [0, 99]")

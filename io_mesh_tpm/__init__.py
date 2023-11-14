@@ -16,8 +16,8 @@
 bl_info = {
 	"name": "Trespasser Model Import/Export (.tpm)",
 	"author": "Matt Rowe",
-	"version": (0, 5, 2),
-	"blender": (3, 0, 0),
+	"version": (1, 0, 0),
+	"blender": (4, 0, 0),
 	"location": "File > Import/Export > Trespasser Model",
 	"description": "Support for importing and exporting models and materials to and from TPM files",
 	"doc_url": "https://www.trescomforum.org/viewtopic.php?f=58&t=11689",
@@ -25,41 +25,10 @@ bl_info = {
 	"category": "Import-Export",
 }
 
-shouldUnregister = False
-
-if "bpy" in locals():
-	from importlib import reload
-	if "tpm_import" in locals():
-		tpm_import = reload(tpm_import)
-	else:
-		from io_mesh_tpm import tpm_import
-	
-	if "tpm_export" in locals():
-		tpm_export = reload(tpm_export)
-	else:
-		from io_mesh_tpm import tpm_export
-	
-	reload(tpm_utils)
-	reload(tpm_types)
-	
-	shouldUnregister = True
-else:
-	from io_mesh_tpm import tpm_import
-	from io_mesh_tpm import tpm_export
-
 import bpy
 
-def register():
-	tpm_import.register()
-	tpm_export.register()
-
-def unregister():
-	tpm_export.unregister()
-	tpm_import.unregister()
+tpmPackages = ["tpm_import", "tpm_export", "tpm_utils", "tpm_types"]
+register, unregister = bpy.utils.register_submodule_factory(__name__, tpmPackages)
 
 if __name__ == "__main__":
-	if shouldUnregister:
-		unregister()
 	register()
-	#bpy.ops.import_mesh.tpm('INVOKE_DEFAULT')
-	#bpy.ops.export_mesh.tpm('INVOKE_DEFAULT')

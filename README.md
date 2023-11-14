@@ -4,9 +4,13 @@ This project is a Blender add-on, `io_mesh_tpm`, designed to support the import 
 ![Imported TPM model in Blender](Documentation/readme-header.png)
 
 ## Installation and Use
-This addon is intended for use with Blender 3.x - the most recently verified supported version is 3.6.1. Installation should proceed as usual for Blender addons - download the desired version of `io_mesh_tpm.zip` and follow the steps in the Blender guide for [installing add-ons](https://docs.blender.org/manual/en/latest/editors/preferences/addons.html#installing-add-ons).
+This addon is intended for use with Blender 4.x - the most recently verified supported version is 4.0.0. Installation should proceed as usual for Blender addons - download the desired version of `io_mesh_tpm.zip` and follow the steps in the Blender guide for [installing add-ons](https://docs.blender.org/manual/en/latest/editors/preferences/addons.html#installing-add-ons).
 
 For usage instructions, please see the [user guide](Documentation/UserGuide.md).
+
+Note that add-on versions apply to Blender as follows:
+* Addon versions 1.x.y are compatible with Blender 4.z
+* Addon versions 0.x.y are compatible with Blender 3.z. The last such add-on version was [0.5.2](https://github.com/LtSten/Blender-TPM/releases/tag/v0.5.2), and was tested against Blender 3.6.1.
 
 ## Project Status
 ### Features
